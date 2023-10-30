@@ -3,21 +3,23 @@ version: '3.4'
 
 x-airflow-common:
   &airflow-common
-  image: apache/airflow:2.0.0
+  build: .
   environment:
     - AIRFLOW__CORE__EXECUTOR=LocalExecutor
-    - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://postgres:postgres@airflow_db:5432/airflow
+    - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://postgres:postgres@db:5432/airflow
     - AIRFLOW__CORE__FERNET_KEY=FB0o_zt4e3Ziq3LdUUO7F2Z95cvFFx16hU8jTeR1ASM=
     - AIRFLOW__CORE__LOAD_EXAMPLES=False
     - AIRFLOW__CORE__LOGGING_LEVEL=INFO
+    - PYTHONPATH=$AIRFLOW_HOME/pharmacies:$PYTHONPATH
   volumes:
     - ./etl/dags:/opt/airflow/dags
-    - ./etl/parsers:/opt/airflow/parsers
+    - ./etl/pharmacies:/opt/airflow/pharmacies
+    - ./api/models:/opt/airflow/models
     - ./etl/airflow-data/logs:/opt/airflow/logs
     - ./etl/airflow-data/plugins:/opt/airflow/plugins
     - ./etl/airflow-data/airflow.cfg:/opt/airlfow/airflow.cfg
   depends_on:
-    - airflow_db
+    - db
 
 services:
   minio:
@@ -54,24 +56,21 @@ services:
     image: postgres
     restart: always
     environment:
-      - POSTGRES_USER=admin
-      - POSTGRES_PASSWORD=admin
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=airflow
+      - POSTGRES_PORT=5432
     ports:
       - '5432:5432'
     volumes:
       - ./db:/var/lib/postgresql/data
       - ./alembic/create_db.sql:/docker-entrypoint-initdb.d/create_user_and_schema.sql
     container_name: pharmacies_database
-
-  airflow_db:
-    image: postgres:12
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=airflow
-      - POSTGRES_PORT=5432
-    ports:
-      - "5435:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "sh -c 'pg_isready -U postgres -d airflow'" ]
+      interval: 30s
+      timeout: 60s
+      retries: 10
 
   airflow-init:
     <<: *airflow-common
@@ -79,7 +78,7 @@ services:
     entrypoint: /bin/bash
     command:
       - -c
-      - airflow users list || ( airflow db init &&
+      - ( airflow db migrate &&
         airflow users create
         --role Admin
         --username airflow
@@ -88,6 +87,9 @@ services:
         --firstname airflow
         --lastname airflow )
     restart: on-failure
+    depends_on:
+      db:
+        condition: service_healthy
 
   airflow-webserver:
     <<: *airflow-common
@@ -96,21 +98,38 @@ services:
       - 8070:8080
     container_name: airflow_webserver
     restart: always
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
 
   airflow-scheduler:
     <<: *airflow-common
     command: airflow scheduler
     container_name: airflow_scheduler
     restart: always
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
 
   api:
-    build: ./api
+    build: app
     ports:
       - 80:80
     restart: always
     container_name: pharmacies_api
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./app:/app
 
   bot:
     build: ./bot
     restart: always
     container_name: pharmacies_bot
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./bot:/bot
+      - ./app/models:/bot/models

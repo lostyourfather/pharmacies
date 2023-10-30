@@ -12,6 +12,8 @@ class AptechestvoItem:
 @dataclass
 class FarmaniItem:
     header: str
+    description: str
     price: float
+    currency: str
     is_prescription: bool
     img_src: str

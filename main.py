@@ -1,4 +1,4 @@
-from etl.parsers.classes.s3_class import S3Class
+from etl.pharmacies.classes.s3_class import S3Class
 
 
 if __name__ == '__main__':
