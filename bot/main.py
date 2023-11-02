@@ -25,7 +25,7 @@ async def command_start_handler(message: Message) -> None:
 async def echo_handler(message: types.Message) -> None:
     try:
         header, description, is_prescription, img_src, value, currency, site_name = get_data(message.text.lower().strip())
-        await message.reply(text=f"Header: {header}\nDescription: {description}\nPrescription: {'Yes' if is_prescription else 'No'}\nImage: {img_src}\nPrice: {value}\nCurrency: {currency}\nSite name: {site_name}")
+        await bot.send_photo(chat_id=message.chat.id , photo=img_src, caption=f"Header: {header}\nDescription: {description}\nPrescription: {'Yes' if is_prescription else 'No'}\nImage: {img_src}\nPrice: {value}\nCurrency: {currency}\nSite name: {site_name}")
     except Exception as e:
         print(e)
         await message.answer("We didn't find this drug! You can try to find another")
@@ -47,6 +47,7 @@ def get_data(request_name):
 
 
 async def main() -> None:
+    global bot
     bot = Bot(TOKEN, parse_mode=ParseMode.HTML)
     await dp.start_polling(bot)
 
