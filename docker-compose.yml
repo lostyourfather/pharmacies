@@ -4,17 +4,12 @@ version: '3.4'
 x-airflow-common:
   &airflow-common
   build: .
-  environment:
-    - AIRFLOW__CORE__EXECUTOR=LocalExecutor
-    - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://postgres:postgres@db:5432/airflow
-    - AIRFLOW__CORE__FERNET_KEY=FB0o_zt4e3Ziq3LdUUO7F2Z95cvFFx16hU8jTeR1ASM=
-    - AIRFLOW__CORE__LOAD_EXAMPLES=False
-    - AIRFLOW__CORE__LOGGING_LEVEL=INFO
-    - PYTHONPATH=$AIRFLOW_HOME/pharmacies:$PYTHONPATH
+  env_file:
+    - "${ENV_FILE:-.env}"
   volumes:
     - ./etl/dags:/opt/airflow/dags
     - ./etl/pharmacies:/opt/airflow/pharmacies
-    - ./api/models:/opt/airflow/models
+    - ./app/models:/opt/airflow/models
     - ./etl/airflow-data/logs:/opt/airflow/logs
     - ./etl/airflow-data/plugins:/opt/airflow/plugins
     - ./etl/airflow-data/airflow.cfg:/opt/airlfow/airflow.cfg
@@ -27,12 +22,9 @@ services:
     ports:
       - "9000:9000"
       - "9001:9001"
+    env_file:
+      - "${ENV_FILE:-.env}"
     restart: unless-stopped
-    environment:
-      - "MINIO_ACCESS_KEY=minioadmin"
-      - "MINIO_SECRET_KEY=minioadmin"
-      - "MINIO_SERVER_URL=http://minio:9000"
-      - "MINIO_BROWSER_REDIRECT_URL=http://localhost:9001"
     command: server /data --console-address ":9001"
     container_name: pharmacies_minio
 
@@ -52,20 +44,18 @@ services:
       exit 0;
       "
 
+
   db:
     image: postgres
     restart: always
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=airflow
-      - POSTGRES_PORT=5432
     ports:
       - '5432:5432'
     volumes:
       - ./db:/var/lib/postgresql/data
       - ./alembic/create_db.sql:/docker-entrypoint-initdb.d/create_user_and_schema.sql
     container_name: pharmacies_database
+    env_file:
+      - "${ENV_FILE:-.env}"
     healthcheck:
       test: [ "CMD-SHELL", "sh -c 'pg_isready -U postgres -d airflow'" ]
       interval: 30s
@@ -117,6 +107,8 @@ services:
       - 80:80
     restart: always
     container_name: pharmacies_api
+    env_file:
+      - "${ENV_FILE:-.env}"
     depends_on:
       db:
         condition: service_healthy
@@ -130,6 +122,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    env_file:
+      - "${ENV_FILE:-.env}"
     volumes:
       - ./bot:/bot
       - ./app/models:/bot/models

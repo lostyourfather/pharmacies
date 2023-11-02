@@ -46,7 +46,7 @@ def upload_data_to_db(**kwargs):
 
 
 with DAG(
-    dag_id='farmani_etl',
+    dag_id='aptechestvo_etl',
     schedule_interval="0 0 * * *",
     start_date=datetime.datetime(2023, 10, 19),
     catchup=False,
@@ -55,7 +55,7 @@ with DAG(
 ) as dag:
     crawler_task = BashOperator(
           task_id='scrapy',
-          bash_command='cd ${AIRFLOW_HOME}/pharmacies/pharmacies/spiders && scrapy crawl farmani',
+          bash_command='cd ${AIRFLOW_HOME}/pharmacies/pharmacies/spiders && scrapy crawl aptechestvo',
           do_xcom_push=True)
 
     upload_data = PythonOperator(

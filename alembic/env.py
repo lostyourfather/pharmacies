@@ -1,11 +1,9 @@
 from logging.config import fileConfig
-import sys
-sys.path.append('/app/models')
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from alembic import context
-from pharmacies import Product, Price
+from app.models.pharmacies import Product
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
