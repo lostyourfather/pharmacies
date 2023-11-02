@@ -1,4 +1,5 @@
 # coding=utf-8
+import os
 from sqlalchemy.orm import declarative_base
 from sqlalchemy import Column, DateTime, create_engine
 from sqlalchemy.sql import func
@@ -15,5 +16,5 @@ class Base(Base):
 
 
 def get_engine():
-    engine = create_engine("postgresql://postgres:postgres@db:5432/pharmacies", echo=False)
+    engine = create_engine(f"postgresql://{os.getenv('POSTGRES_USER')}:{os.getenv('POSTGRES_PASSWORD')}@db:5432/pharmacies", echo=False)
     return engine

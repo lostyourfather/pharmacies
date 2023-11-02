@@ -13,8 +13,8 @@ class S3Class:
                                  verify=False)
 
     def upload_file(self, bucket_name, file_name, data):
-        # self.s3.Bucket(bucket_name).upload_file(file_path, file_name)
         self.s3.Object(bucket_name, file_name).put(Body=data)
+
     def download_file(self, bucket_name, file_path, file_name):
         self.s3.Bucket(bucket_name).download_file(file_name, file_path)
 
@@ -22,7 +22,3 @@ class S3Class:
         obj = self.s3.Object(bucket_name, file_name).get()
         df = pd.read_csv(io.BytesIO(obj['Body'].read()), sep=';')
         return df
-# s3 = S3Class('http://localhost:9000',
-#              'minioadmin',
-#              'minioadmin')
-# s3.upload_file('pharmacies', 'smth.csv', 'afs\nfad\n')

@@ -1,8 +1,8 @@
-from os import environ
+import os
 import databases
 
 
-DATABASE_URL = environ.get("DATABASE_URL", "postgres:postgres@db:5432/pharmacies")
+DATABASE_URL = f"{os.getenv('POSTGRES_USER')}:{os.getenv('POSTGRES_PASSWORD')}@db:5432/pharmacies"
 TESTING = False
 
 

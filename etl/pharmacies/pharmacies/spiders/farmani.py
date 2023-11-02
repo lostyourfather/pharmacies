@@ -37,5 +37,5 @@ class FarmaniSpider(scrapy.Spider):
             print('img_src', img_src)
             is_prescription = 'img' in response.css("div.recipe")[i].extract()
             print('is_prescription', is_prescription)
-            object = FarmaniItem(header=header, description=description, price=price, currency=currency, is_prescription=is_prescription, img_src=img_src)
+            object = FarmaniItem(header=header, description=description, price=price, currency=currency, is_prescription=is_prescription, img_src=img_src, site_name='farmani')
             yield object
