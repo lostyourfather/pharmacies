@@ -18,6 +18,7 @@ class Product(Base):
     description = Column(TEXT, nullable=True)
     is_prescription = Column(BOOLEAN, nullable=False, default=False)
     img_src = Column(VARCHAR(255), nullable=True)
+    link = Column(VARCHAR(255), nullable=True)
 
 
 class Price(Base):
