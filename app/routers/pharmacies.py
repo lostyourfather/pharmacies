@@ -18,6 +18,7 @@ async def get_orders_by_filters(product_header: str = None):
         "description": db_products[0].description,
         "is_prescription": db_products[0].is_prescription,
         "img_src": db_products[0].img_src,
+        "link": db_products[0].link,
         "prices": []
     }
     for db_price in db_prices:

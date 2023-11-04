@@ -11,11 +11,11 @@ class PharmaciesPipeline:
         self.buf = StringIO()
         date_today = datetime.datetime.now().strftime("%d-%m-%Y")
         self.buf.name = f"{spider.name}_{date_today}.csv"
-        self.buf.write(f"header;description;value;currency;is_prescription;img_src;site_name\n")
+        self.buf.write(f"header;description;value;currency;is_prescription;img_src;site_name;link\n")
 
     def process_item(self, item, spider):
         print("process spider")
-        self.buf.write(f"{item.header.lower()};{item.description};{item.price};{item.currency};{item.is_prescription};{item.img_src};{item.site_name}\n")
+        self.buf.write(f"{item.header.lower()};{item.description};{item.price};{item.currency};{item.is_prescription};{item.img_src};{item.site_name};{item.link}\n")
 
     def close_spider(self, spider):
         print("close spider", self.buf.getvalue())

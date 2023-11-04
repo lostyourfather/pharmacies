@@ -24,8 +24,8 @@ async def command_start_handler(message: Message) -> None:
 @dp.message()
 async def echo_handler(message: types.Message) -> None:
     try:
-        header, description, is_prescription, img_src, value, currency, site_name = get_data(message.text.lower().strip())
-        await message.reply(text=f"Header: {header}\nDescription: {description}\nPrescription: {'Yes' if is_prescription else 'No'}\nImage: {img_src}\nPrice: {value}\nCurrency: {currency}\nSite name: {site_name}")
+        header, description, is_prescription, img_src, value, currency, site_name, link = get_data(message.text.lower().strip())
+        await message.reply(text=f"Header: {header}\nDescription: {description}\nPrescription: {'Yes' if is_prescription else 'No'}\nImage: {img_src}\nPrice: {value}\nCurrency: {currency}\nSite name: {site_name}\nLink: {link}")
     except Exception as e:
         print(e)
         await message.answer("We didn't find this drug! You can try to find another")
@@ -43,7 +43,7 @@ def get_data(request_name):
         product = products[0][0]
         price = prices[0][0]
         site_name = site_name[0][0]
-        return product.header, product.description, product.is_prescription, product.img_src, price.value, price.currency, site_name.title
+        return product.header, product.description, product.is_prescription, product.img_src, price.value, price.currency, site_name.title, product.link
 
 
 async def main() -> None:

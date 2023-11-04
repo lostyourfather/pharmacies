@@ -34,7 +34,7 @@ def upload_data_to_db(**kwargs):
             if not product_id:
                 product = Product(header=row.header, description=row.description,
                                   is_prescription=row.is_prescription, img_src=row.img_src,
-                                  site_name_id=site_names[row.site_name])
+                                  site_name_id=site_names[row.site_name], link=row.link)
                 session.add(product)
                 session.flush()
                 session.commit()
